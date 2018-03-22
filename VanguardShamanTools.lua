@@ -396,7 +396,10 @@ function VGST_OnEvent()
 	elseif (event == "CHAT_MSG_SPELL_SELF_BUFF") then
 		for totem in string.gfind(arg1, "You cast (.*) Totem.") do
 			if (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0) then
-				SendAddonMessage("VGST_NewTotem", playerName.."!"..VGST_TotemInfo[totem].texture.."!"..VGST_TotemInfo[totem].duration.."!"..VGST_TotemInfo[totem].element.."!"..VGST_TotemInfo[totem].tickInterval.."!"..(0), "RAID")
+				local zone = GetZoneText()
+				local channel = "RAID"
+				if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
+				SendAddonMessage("VGST_NewTotem", playerName.."!"..VGST_TotemInfo[totem].texture.."!"..VGST_TotemInfo[totem].duration.."!"..VGST_TotemInfo[totem].element.."!"..VGST_TotemInfo[totem].tickInterval.."!"..(0), channel)
 			else
 				VGST_AddTotem(playerName, VGST_TotemInfo[totem].texture, VGST_TotemInfo[totem].duration, VGST_TotemInfo[totem].element, VGST_TotemInfo[totem].tickInterval, 0)
 			end
@@ -411,7 +414,10 @@ function VGST_OnEvent()
 		if (VGST_ActiveTotems ~= nil and VGST_ActiveTotems[playerName] ~= nil) then
 			for element,entry in pairs(VGST_ActiveTotems[playerName]) do
 				if (element ~= 16 and element ~= 17) then
-					SendAddonMessage("VGST_HiBob!"..arg2, playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..(GetTime() - entry.castAt), "RAID")
+					local zone = GetZoneText()
+					local channel = "RAID"
+					if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
+					SendAddonMessage("VGST_HiBob!"..arg2, playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..(GetTime() - entry.castAt), channel)
 				end
 			end
 		end
@@ -437,12 +443,15 @@ function VGST_OnEvent()
 		local oldGroupLevel = VGST_GroupLevel
 		VGST_LoadRosterInfo()
 		VGST_UpdateYourTotems()
+		local zone = GetZoneText()
+		local channel = "RAID"
+		if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
 		if (oldGroupLevel < VGST_GroupLevel) then -- Since you joined a new group, it's time to tell everyone about the totems that you bring and ask for them to share theirs
-			SendAddonMessage("VGST_HiImBob", playerName, "RAID")
+			SendAddonMessage("VGST_HiImBob", playerName, channel)
 			if (VGST_ActiveTotems ~= nil and VGST_ActiveTotems[playerName] ~= nil) then
 				for element, entry in pairs(VGST_ActiveTotems[playerName]) do
 					if (element ~= 16 and element ~= 17) then
-						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..entry.tickTimer.."!"..(GetTime() - entry.castAt).."!"..entry.totalDuration, "RAID")
+						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..entry.tickTimer.."!"..(GetTime() - entry.castAt).."!"..entry.totalDuration, channel)
 					end
 				end
 			end
