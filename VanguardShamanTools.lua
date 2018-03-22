@@ -472,7 +472,7 @@ function getWeaponEnchantmentDuration(slot)
 	VGSTTooltip:ClearLines()
 	local hasItem,_,_ = VGSTTooltip:SetInventoryItem("player", slot)
 	if (hasItem) then
-		for lineNum = 6, 10 do
+		for lineNum = 6, 15 do
 			local line = getglobal("VGSTTooltipTextLeft"..lineNum)
 			if (line:IsShown()) then
 				local text = line:GetText()
