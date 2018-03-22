@@ -2,8 +2,11 @@
 
 `Created by Threewords of the guild "Vanguard", Kronos, Twinstar`
 
-## Bugs
-* /vgst reset creates new frames, it should just reset position and scale of old frames
+## Usage
+
+* `/vgst` - list of commands
+* `/vgst reset` - resets the position and scale of the bar
+* `/vgst move` - unlocks the bar so that it can be moved
 
 ## Features
 * Tracks remaining duration of your totems
@@ -12,5 +15,8 @@
 * Tick timers for totems that tick, both yours and those from other shamans in your party
 * Tracking weapon enchantment from Windfury and Flametongue totems
 * Synchronization works on-the-fly, allowing tracking of totem timers that were cast outside of your raid/party as long as the caster is now in it
+
+## Bugs
+* /vgst reset creates new frames, it should just reset position and scale of old frames
 
 ![Image of VGST](https://i.imgur.com/zXGQQDT.png)
