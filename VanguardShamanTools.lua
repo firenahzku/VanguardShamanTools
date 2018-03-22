@@ -466,6 +466,9 @@ function VGST_OnEvent()
 end
 
 function getWeaponEnchantmentDuration(slot)
+	-- nil: there is no weapon equipped
+	-- -1: There is no weapon enchantment
+	-- number >= 0: duration of the Totem weapon enchantment
 	VGSTTooltip:ClearLines()
 	local hasItem,_,_ = VGSTTooltip:SetInventoryItem("player", slot)
 	if (hasItem) then
@@ -482,6 +485,8 @@ function getWeaponEnchantmentDuration(slot)
 				return -1
 			end
 		end
+	else
+		return nil
 	end
 end
 
@@ -498,8 +503,11 @@ function VGST_OnUpdate()
 					if (VGST_ActiveTotems[caster][element].castAt + VGST_ActiveTotems[caster][element].duration <= currentTime) then
 						VGST_ActiveTotems[caster][element] = nil
 					else -- Check if the weapon totem enchantment is still on
-						if ((element == 16 or element == 17) and getWeaponEnchantmentDuration(element) < 0) then
-							VGST_ActiveTotems[caster][element] = nil
+						if (element == 16 or element == 17) then
+							local chantCode = getWeaponEnchantmentDuration(element)
+							if (chantCode == nil or chantCode < 0) then
+								VGST_ActiveTotems[caster][element] = nil
+							end
 						end
 					end
 				end
@@ -535,7 +543,8 @@ function VGST_OnUpdate()
 							end
 						end
 
-						if ((texturePath == "Interface\\Icons\\Spell_Nature_Windfury" or texturePath == "Interface\\Icons\\Spell_Nature_GuardianWard") and VGST_ActiveTotems[caster][16] == nil and getWeaponEnchantmentDuration(16) >= 0) then
+						local chantCode = getWeaponEnchantmentDuration(16)
+						if ((texturePath == "Interface\\Icons\\Spell_Nature_Windfury" or texturePath == "Interface\\Icons\\Spell_Nature_GuardianWard") and VGST_ActiveTotems[caster][16] == nil and chantCode ~= nil and chantCode >= 0) then
 							-- If it is a weapon totem, we need to make sure that we keep tracking it when we regain the weapon buff
 							local weaponTexture = GetInventoryItemTexture("player", 16)
 							VGST_ActiveTotems[caster][16] = {texturePath = weaponTexture, duration = VGST_ActiveTotems[caster][element].duration, tickInterval = 5, x = 0, y = 0, castAt = VGST_ActiveTotems[caster][element].castAt}
