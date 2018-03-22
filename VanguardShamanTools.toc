@@ -1,0 +1,5 @@
+## Title: VanguardShamanTools
+## Author: Threewords <Vanguard>, Kronos, Twinstar
+## Version: 1.0
+## SavedVariables: VGSTConfig
+VanguardShamanTools.lua
