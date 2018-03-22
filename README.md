@@ -2,10 +2,10 @@
 
 `Created by Threewords of the guild "Vanguard", Kronos, Twinstar`
 
-##Bugs
+## Bugs
 * /vgst reset creates new frames, it should just reset position and scale of old frames
 
-##Features
+## Features
 * Tracks remaining duration of your totems
 * Synchronizes the timers so that everyone sees all totems affecting their party
 * Out-of-range indicator for totems that apply aura on the player
