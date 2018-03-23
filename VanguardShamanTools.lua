@@ -40,8 +40,8 @@ VGST_BuffTotems = {
 }
 VGST_ElementColors = {
 	["Air"] = {r = 188/256, g = 231/256, b = 244/256},
-	["Earth"] = {r = 99/256, g = 54/256, b = 54/256},
-	["Fire"] = {r = 257/256, g = 158/256, b = 2/256},
+	["Earth"] = {r = 174/256, g = 119/256, b = 96/256},
+	["Fire"] = {r = 255/256, g = 80/256, b = 0/256},
 	["Water"] = {r = 27/256, g = 99/256, b = 198/256},
 	[16] = {r = 1, g = 1, b = 0},
 	[17] = {r = 1, g = 1, b = 0},
@@ -98,6 +98,7 @@ function VGST_InitializeTotemBars()
 	VGST_TotemBars.mainFrame:SetScript("OnDragStart", function() VGST_OnDragStart() end)
 	VGST_TotemBars.mainFrame:SetScript("OnDragStop", function() VGST_OnDragStop() end)
 	VGST_TotemBars.mainFrame:SetAlpha(0)
+	VGST_TotemBars.mainFrame:EnableMouse(false)
 	-- VGST_TotemBars.mainFrame:Hide()
 	-- if (VGSTConfig.isUnlocked == false) then
 	-- 	VGST_TotemBars.mainFrame:Hide()
@@ -111,6 +112,7 @@ function VGST_InitializeTotemBars()
 		frame:SetWidth(VGSTConfig.defaultWidth)
 		frame:SetHeight(VGSTConfig.defaultHeight * 1.2)
 		frame:SetBackdrop({edgeFile = "Interface/DialogFrame/UI-DialogBox-Border", edgeSize = "10", tile = true})
+		-- frame:EnableMouse(false)
 		-- frame:SetBackdrop({bgFile = "Interface/RaidFrame/UI-RaidFrame-GroupBg", tile = true, tileSize = VGSTConfig.defaultHeight})
 
 		frame.texturePath = "Interface/Icons/Spell_Nature_Windfury"
@@ -124,7 +126,7 @@ function VGST_InitializeTotemBars()
 		texture:SetHeight(VGSTConfig.defaultHeight)
 		texture:SetWidth(VGSTConfig.defaultWidth)
 		texture:SetTexture(frame.texturePath)
-		-- texture:SetAlpha(0)
+		-- texture:EnableMouse(false)
 		
 		frame.range = frame:CreateTexture(nil, "OVERLAY")
 		local range = frame.range
@@ -135,6 +137,7 @@ function VGST_InitializeTotemBars()
 		range:SetTexture(1,0,0)
 		range:SetAlpha(0.3)
 		range:Hide()
+		-- range:EnableMouse(false)
 
 		frame.timer = frame:CreateFontString(nil, "ARTWORK")
 		local timer = frame.timer
@@ -144,6 +147,7 @@ function VGST_InitializeTotemBars()
 		timer:SetFont("Fonts\\FRIZQT__.TTF", VGSTConfig.defaultTextSize, "OUTLINE")
 		timer:SetText(VGST_SecondsToTime(0))
 		timer:SetTextColor(1, 1, 1)
+		-- timer:EnableMouse(false)
 
 		frame.cooldown = CreateFrame("StatusBar", nil, frame)
 		local cooldown = frame.cooldown
@@ -154,6 +158,7 @@ function VGST_InitializeTotemBars()
 		cooldown:SetBackdrop({bgFile = "Interface/RaidFrame/UI-RaidFrame-GroupBg", tile = true, tileSize = VGSTConfig.defaultHeight * 0.15})
 		cooldown:SetAlpha(1)
 		cooldown:Hide()
+		-- cooldown:EnableMouse(false)
 	end
 	if (VGSTConfig.scale ~= 1.0) then
 		VGST_UpdateScale()
