@@ -639,12 +639,14 @@ function VGST_SlashCommand(msg)
 		if (VGSTConfig.isUnlocked == false) then
 			VGSTConfig.isUnlocked = true
 			VGST_TotemBars.mainFrame:SetAlpha(0.5)
+			VGST_TotemBars.mainFrame:EnableMouse(true)
 			for i = 1, VGSTConfig.numTotems do
 				VGST_TotemBars.totemFrames[i]:SetAlpha(0.5)
 			end
 			-- VGST_TotemBars.mainFrame:Show()
 			VGST_TotemBars.mainFrame:SetMovable(true)
 		else
+			VGST_TotemBars.mainFrame:EnableMouse(false)
 			VGSTConfig.isUnlocked = false
 			VGST_TotemBars.mainFrame:SetAlpha(0)
 			for i = 1, VGSTConfig.numTotems do
