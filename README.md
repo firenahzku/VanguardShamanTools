@@ -16,7 +16,4 @@
 * Tracking weapon enchantment from Windfury and Flametongue totems
 * Synchronization works on-the-fly, allowing tracking of totem timers that were cast outside of your raid/party as long as the caster is now in it
 
-## Bugs
-* /vgst reset creates new frames, it should just reset position and scale of old frames
-
 ![Image of VGST](https://i.imgur.com/zXGQQDT.png)
