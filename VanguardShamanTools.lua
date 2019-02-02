@@ -313,13 +313,6 @@ function VGST_ReduceTotemHealth(caster, element, newHealth)
 	if (VGST_ActiveTotems[caster] ~= nil and VGST_ActiveTotems[caster][element] ~= nil) then
 		VGST_ActiveTotems[caster][element].health = tonumber(newHealth)
 		if (VGST_ActiveTotems[caster][element].health <= 0) then	-- Totem is dead and needs to be removed
-			if (BigWigsWarningSign ~= nil and BigWigsMessages ~= nil) then
-				BigWigsWarningSign:BigWigs_ShowWarningSign(VGST_ActiveTotems[caster][element].texturePath, 5, true)
-				BigWigsMessages:BigWigs_Message("Totem destroyed!", "Attention", true, "Long")
-			else
-				DEFAULT_CHAT_FRAME:AddMessage("Totem destroyed!")
-			end
-			VGST_ActiveTotems[caster][element] = nil
 			VGST_UpdateYourTotems()
 		end
 	end
@@ -369,6 +362,13 @@ function VGST_UpdateYourTotems()
 			end
 			VGST_TotemBars.totemFrames[n]:Show()
 			VGST_TotemCheck[caster][texturePath] = true
+			elseif (VGST_ShamansInGroup[caster] == true and totemShouldRemain == true and VGST_ActiveTotems[caster][element].duration >= VGST_UpdateInterval and tonumber(VGST_ActiveTotems[caster][element].health) <= 0) then	-- Totem got destroyed
+			if (BigWigsWarningSign ~= nil and BigWigsMessages ~= nil) then
+				BigWigsWarningSign:BigWigs_ShowWarningSign(VGST_ActiveTotems[caster][element].texturePath, 5, true)
+				BigWigsMessages:BigWigs_Message("Totem destroyed!", "Attention", true, "Long")
+			else
+				DEFAULT_CHAT_FRAME:AddMessage("Totem destroyed!")
+			end
 		end
 	end
 	-- Hide the frames for removed totems
