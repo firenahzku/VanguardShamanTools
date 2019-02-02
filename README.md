@@ -15,5 +15,6 @@
 * Tick timers for totems that tick, both yours and those from other shamans in your party
 * Tracking weapon enchantment from Windfury and Flametongue totems
 * Synchronization works on-the-fly, allowing tracking of totem timers that were cast outside of your raid/party as long as the caster is now in it
+* If you have BigWigs installed, it will display a warning icon and message when a totem that was affecting you is destroyed (either yours or from another shaman)
 
 ![Image of VGST](https://i.imgur.com/zXGQQDT.png)

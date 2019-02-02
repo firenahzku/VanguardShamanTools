@@ -55,6 +55,8 @@ VanguardShamanToolsFrame:RegisterEvent("CHAT_MSG_SPELL_SELF_BUFF")
 VanguardShamanToolsFrame:RegisterEvent("PLAYER_AURAS_CHANGED")
 VanguardShamanToolsFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
 VanguardShamanToolsFrame:RegisterEvent("RAID_ROSTER_UPDATE")
+VanguardShamanToolsFrame:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS")
+VanguardShamanToolsFrame:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE")
 VanguardShamanToolsFrame.Tooltip = CreateFrame("GameTooltip", "VGSTTooltip", nil, "GameTooltipTemplate")
 VanguardShamanToolsFrame.Tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
@@ -166,6 +168,7 @@ end
 
 function VGST_totemFrameBar(flag)
 	if (flag == true) then
+		Print("locked")
 		for i = 1, 9 do
 			if (LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:UnregisterEvent("PARTY_MEMBERS_CHANGED")
@@ -173,6 +176,7 @@ function VGST_totemFrameBar(flag)
 			end
 		end
 	elseif (flag == false) then
+		Print("unlocked")
 		for i = 1, 9 do
 			if (LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:RegisterEvent("PARTY_MEMBERS_CHANGED")
@@ -193,9 +197,11 @@ function VGST_LoadTotemInfo()
 			for totem in string.gfind(spellName, "(.*) Totem") do
 				local tex = GetSpellTexture(s, BOOKTYPE_SPELL)
 				local dur = 0
+				local hp = 5
 				VGSTTooltip:ClearLines();
 				VGSTTooltip:SetSpell(s, i);
 				if (VGSTTooltipTextLeft5:IsShown()) then
+					-- Duration
 					for num in string.gfind(VGSTTooltipTextLeft5:GetText(), "for ([0-9]*) sec") do
 						dur = num * 1
 					end
@@ -208,6 +214,13 @@ function VGST_LoadTotemInfo()
 					for num in string.gfind(VGSTTooltipTextLeft5:GetText(), "asts ([0-9]*) min") do
 						dur = num * 60
 					end
+					-- Health
+					for num in string.gfind(VGSTTooltipTextLeft5:GetText(), "with ([0-9]*) health") do
+						hp = num * 1
+					end
+					for num in string.gfind(VGSTTooltipTextLeft5:GetText(), "has ([0-9]*) health") do
+						hp = num * 1
+					end
 				end
 				local elem = "None"
 				if (VGSTTooltipTextLeft4:IsShown()) then
@@ -217,7 +230,7 @@ function VGST_LoadTotemInfo()
 				end
 				local tick = 0
 				if (VGST_TotemTickIntervals[totem] ~= nil) then tick = VGST_TotemTickIntervals[totem] end
-				VGST_TotemInfo[totem] = {texture = tex, duration = dur, element = elem, tickInterval = tick}
+				VGST_TotemInfo[totem] = {texture = tex, duration = dur, element = elem, tickInterval = tick, health = hp}
 			end
 		end
 	end
@@ -269,7 +282,7 @@ function VGST_LoadRosterInfo()
 	end
 end
 
-function VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore)
+function VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore, totemHealth)
 	-- DEFAULT_CHAT_FRAME:AddMessage(caster.. " "..totemTexture.. " "..duration.. " "..element.." "..tickInterval)
 	local skipUpdate = false
 	if (VGST_ActiveTotems == nil) then VGST_ActiveTotems = {} end
@@ -277,7 +290,7 @@ function VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, ca
 	if (VGST_ActiveTotems[caster][element] ~= nil and VGST_ActiveTotems[caster][element].texturePath == totemTexture) then
 		skipUpdate = true -- We already have this totem up, and it only needs its duration refreshed
 	end
-	VGST_ActiveTotems[caster][element] = {texturePath = totemTexture, duration = tonumber(duration), tickInterval = tonumber(tickInterval), x = 0, y = 0, castAt = GetTime() - tonumber(castBefore)}
+	VGST_ActiveTotems[caster][element] = {texturePath = totemTexture, duration = tonumber(duration), tickInterval = tonumber(tickInterval), x = 0, y = 0, castAt = GetTime() - tonumber(castBefore), health = tonumber(totemHealth)}
 
 	if (totemTexture == "Interface\\Icons\\Spell_Nature_Windfury" or totemTexture == "Interface\\Icons\\Spell_Nature_GuardianWard") then -- We need to track weapon enchantment
 		VGSTTooltip:ClearLines()
@@ -285,7 +298,7 @@ function VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, ca
 		if (hasItem) then
 			local weaponTexture = GetInventoryItemTexture("player", 16)
 			-- VGST_AddTotem(playerName, weaponTexture, duration, i, 5, 0) -- using weapon slot as element
-			VGST_ActiveTotems[caster][16] = {texturePath = weaponTexture, duration = tonumber(duration), tickInterval = 5, x = 0, y = 0, castAt = GetTime() - tonumber(castBefore)}
+			VGST_ActiveTotems[caster][16] = {texturePath = weaponTexture, duration = tonumber(duration), tickInterval = 5, x = 0, y = 0, castAt = GetTime() - tonumber(castBefore), health = tonumber(totemHealth)}
 		end
 	end
 
@@ -293,6 +306,22 @@ function VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, ca
 	if (VGST_CharacterSubgroup[caster] == VGST_CharacterSubgroup[playerName] and skipUpdate == false) then -- the new totem affects your subgroup and your totem bar needs updating
 		-- DEFAULT_CHAT_FRAME:AddMessage(1337)
 		VGST_UpdateYourTotems()
+	end
+end
+
+function VGST_ReduceTotemHealth(caster, element, newHealth)
+	if (VGST_ActiveTotems[caster] ~= nil and VGST_ActiveTotems[caster][element] ~= nil) then
+		VGST_ActiveTotems[caster][element].health = tonumber(newHealth)
+		if (VGST_ActiveTotems[caster][element].health <= 0) then	-- Totem is dead and needs to be removed
+			if (BigWigsWarningSign ~= nil and BigWigsMessages ~= nil) then
+				BigWigsWarningSign:BigWigs_ShowWarningSign(VGST_ActiveTotems[caster][element].texturePath, 5, true)
+				BigWigsMessages:BigWigs_Message("Totem destroyed!", "Attention", true, "Long")
+			else
+				DEFAULT_CHAT_FRAME:AddMessage("Totem destroyed!")
+			end
+			VGST_ActiveTotems[caster][element] = nil
+			VGST_UpdateYourTotems()
+		end
 	end
 end
 
@@ -312,7 +341,7 @@ function VGST_UpdateYourTotems()
 			-- DEFAULT_CHAT_FRAME:AddMessage(charName)
 		-- end
 	end
-	-- Check if your currently displayed totems need to be removed (either shaman is no longer in your group, or the totem expired)
+	-- Check if your currently displayed totems need to be removed (either shaman is no longer in your group, or the totem expired, or it was destroyed)
 	local n = 0
 	for i = 1, VGST_NumActiveTotems do
 		local caster = VGST_TotemBars.totemFrames[i].caster
@@ -321,7 +350,7 @@ function VGST_UpdateYourTotems()
 
 		local totemShouldRemain = (VGST_ActiveTotems[caster] ~= nil) and (VGST_ActiveTotems[caster][element] ~= nil) and (VGST_ActiveTotems[caster][element].texturePath == texturePath)
 
-		if (VGST_ShamansInGroup[caster] == true and totemShouldRemain == true and VGST_ActiveTotems[caster][element].duration >= VGST_UpdateInterval) then
+		if (VGST_ShamansInGroup[caster] == true and totemShouldRemain == true and VGST_ActiveTotems[caster][element].duration >= VGST_UpdateInterval and tonumber(VGST_ActiveTotems[caster][element].health) > 0) then
 			n = n + 1
 			VGST_TotemBars.totemFrames[n].caster = caster
 			VGST_TotemBars.totemFrames[n].element = element
@@ -399,15 +428,15 @@ function VGST_OnEvent()
 				local zone = GetZoneText()
 				local channel = "RAID"
 				if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
-				SendAddonMessage("VGST_NewTotem", playerName.."!"..VGST_TotemInfo[totem].texture.."!"..VGST_TotemInfo[totem].duration.."!"..VGST_TotemInfo[totem].element.."!"..VGST_TotemInfo[totem].tickInterval.."!"..(0), channel)
+				SendAddonMessage("VGST_NewTotem", playerName.."!"..VGST_TotemInfo[totem].texture.."!"..VGST_TotemInfo[totem].duration.."!"..VGST_TotemInfo[totem].element.."!"..VGST_TotemInfo[totem].tickInterval.."!"..(0).."!"..VGST_TotemInfo[totem].health, channel)
 			else
-				VGST_AddTotem(playerName, VGST_TotemInfo[totem].texture, VGST_TotemInfo[totem].duration, VGST_TotemInfo[totem].element, VGST_TotemInfo[totem].tickInterval, 0)
+				VGST_AddTotem(playerName, VGST_TotemInfo[totem].texture, VGST_TotemInfo[totem].duration, VGST_TotemInfo[totem].element, VGST_TotemInfo[totem].tickInterval, 0, VGST_TotemInfo[totem].health)
 			end
 		end
 
 	elseif (event == "CHAT_MSG_ADDON" and arg1 == "VGST_NewTotem") then
-		for caster, totemTexture, duration, element, tickInterval, castBefore in string.gfind(arg2, "(.+)!(.+)!(.+)!(.+)!(.+)!(.+)") do
-			VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore)
+		for caster, totemTexture, duration, element, tickInterval, castBefore, health in string.gfind(arg2, "(.+)!(.+)!(.+)!(.+)!(.+)!(.+)!(.+)") do
+			VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore, health)
 		end
 
 	elseif (event == "CHAT_MSG_ADDON" and arg1 == "VGST_HiImBob") then -- A new player joined the group and is asking for totem info
@@ -417,7 +446,7 @@ function VGST_OnEvent()
 					local zone = GetZoneText()
 					local channel = "RAID"
 					if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
-					SendAddonMessage("VGST_HiBob!"..arg2, playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..(GetTime() - entry.castAt), channel)
+					SendAddonMessage("VGST_HiBob!"..arg2, playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..(GetTime() - entry.castAt).."!"..entry.health, channel)
 				end
 			end
 		end
@@ -425,10 +454,37 @@ function VGST_OnEvent()
 	elseif (event == "CHAT_MSG_ADDON" and string.find(arg1, "VGST_HiBob!")) then
 		for recipient in string.gfind(arg1, "VGST_HiBob!(.*)") do
 			if (recipient == playerName) then -- our call for totem info sharing was answered
-				for caster, totemTexture, duration, element, tickInterval, castBefore in string.gfind(arg2, "(.+)!(.+)!(.+)!(.+)!(.+)!(.+)") do
-					VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore)
+				for caster, totemTexture, duration, element, tickInterval, castBefore, health in string.gfind(arg2, "(.+)!(.+)!(.+)!(.+)!(.+)!(.+)!(.+)") do
+					VGST_AddTotem(caster, totemTexture, duration, element, tickInterval, castBefore, health)
 				end
 			end
+		end
+
+	elseif (event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" or event == "CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE") then
+		for totem, damage in string.gfind(arg1, "[hcr]+its (.*) for (.*)") do
+			if (totem ~= "you") then
+				for totemName in string.gfind(totem, "(.*) Totem") do	-- Removing the "Totem" part from the name
+					Print(totemName)
+					local texture = VGST_TotemInfo[totemName].texture
+					local element = VGST_TotemInfo[totemName].element
+					if (VGST_ActiveTotems[playerName] ~= nil and VGST_ActiveTotems[playerName][element] ~= nil and VGST_ActiveTotems[playerName][element].texturePath == texture) then
+						if (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0) then
+							local zone = GetZoneText()
+							local channel = "RAID"
+							if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
+							SendAddonMessage("VGST_TotemDamage", playerName.."!"..VGST_TotemInfo[totemName].element.."!"..(VGST_ActiveTotems[playerName][element].health - tonumber(damage)), channel)
+						else
+							VGST_ReduceTotemHealth(playerName, VGST_TotemInfo[totemName].element, VGST_ActiveTotems[playerName][element].health - tonumber(damage))
+						end
+						-- Print(VGST_ActiveTotems[playerName][element].health - tonumber(damage))
+					end
+				end
+			end
+		end
+
+	elseif (event == "CHAT_MSG_ADDON" and arg1 == "VGST_TotemDamage") then
+		for caster, element, newHealth in string.gfind(arg2, "(.+)!(.+)!(.+)") do
+			VGST_ReduceTotemHealth(caster, element, newHealth)
 		end
 
 	elseif (event == "CHAT_MSG_ADDON" and arg1 == "VGST_OTH") then
@@ -451,7 +507,7 @@ function VGST_OnEvent()
 			if (VGST_ActiveTotems ~= nil and VGST_ActiveTotems[playerName] ~= nil) then
 				for element, entry in pairs(VGST_ActiveTotems[playerName]) do
 					if (element ~= 16 and element ~= 17) then
-						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..entry.tickTimer.."!"..(GetTime() - entry.castAt).."!"..entry.totalDuration, channel)
+						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..entry.tickTimer.."!"..(GetTime() - entry.castAt).."!"..entry.totalDuration.."!"..entry.health, channel)
 					end
 				end
 			end
