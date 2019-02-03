@@ -195,6 +195,7 @@ function VGST_LoadTotemInfo()
 		for s = offset + 1, offset + numSpells do
 			local spellName = GetSpellName(s, BOOKTYPE_SPELL)
 			for totem in string.gfind(spellName, "(.*) Totem") do
+				Print(totem)
 				local tex = GetSpellTexture(s, BOOKTYPE_SPELL)
 				local dur = 0
 				local hp = 5
@@ -473,12 +474,14 @@ function VGST_OnEvent()
 		end
 
 	elseif (event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" or event == "CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE") then
-		for totem, damage in string.gfind(arg1, "[hcr]+its (.*) for (.*)") do
+		for totem, damage in string.gfind(arg1, "[hcr]+its (.*) for ([0-9]+)") do
 			if (totem ~= "you") then
 				for totemName in string.gfind(totem, "(.*) Totem") do	-- Removing the "Totem" part from the name
-					Print(totemName)
 					local texture = VGST_TotemInfo[totemName].texture
 					local element = VGST_TotemInfo[totemName].element
+					Print(totemName)
+					Print("Health: "..VGST_ActiveTotems[playerName][element].health)
+					Print("Damage: "..damage)
 					if (VGST_ActiveTotems[playerName] ~= nil and VGST_ActiveTotems[playerName][element] ~= nil and VGST_ActiveTotems[playerName][element].texturePath == texture) then
 						if (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0) then
 							local zone = GetZoneText()
