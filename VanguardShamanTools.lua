@@ -576,7 +576,7 @@ function VGST_OnUpdate()
 	local needsCleanup = false
 	if (delta >= VGST_UpdateInterval) then
 		local playerName = UnitName("player")
-		-- Update time for ALL totems that you are aware of
+		-- Check if ANY of the totems that you are aware of have expired
 		if (VGST_ActiveTotems ~= nil) then
 			for caster, val in pairs(VGST_ActiveTotems) do
 				for element, entry in pairs(val) do
@@ -632,17 +632,25 @@ function VGST_OnUpdate()
 						end
 					else -- weapon totems enchantment
 						local tooltipRemaining = getWeaponEnchantmentDuration(element)
-						local remaining = VGST_ActiveTotems[caster][element].duration - (currentTime - VGST_ActiveTotems[caster][element].castAt)
-						if (remaining < tooltipRemaining) then VGST_ActiveTotems[caster][element].duration = VGST_ActiveTotems[caster][element].duration + 5 end
+						local timePassed = (currentTime - VGST_ActiveTotems[caster][element].castAt)
+						local remaining = VGST_ActiveTotems[caster][element].duration - timePassed
+						-- if (remaining < tooltipRemaining) then VGST_ActiveTotems[caster][element].duration = VGST_ActiveTotems[caster][element].duration + 5 end
 
-						local ticksSoFar = math.floor(remaining / VGST_ActiveTotems[caster][element].tickInterval)
-						local tickProgress = remaining - ticksSoFar * VGST_ActiveTotems[caster][element].tickInterval
-						VGST_TotemBars.totemFrames[i].cooldown:SetValue(5 - tickProgress)
+						-- local ticksSoFar = math.floor(remaining / VGST_ActiveTotems[caster][element].tickInterval)
+						local ticksSoFar = math.floor(timePassed / VGST_ActiveTotems[caster][element].tickInterval)
+						local tickProgress = timePassed - ticksSoFar * VGST_ActiveTotems[caster][element].tickInterval
+						VGST_TotemBars.totemFrames[i].cooldown:SetValue(tickProgress)
 
-						remaining = math.floor(remaining - math.floor(remaining / 10) * 10)
-						if (tooltipRemaining > remaining) then remaining = remaining + 5 end
-						VGST_TotemBars.totemFrames[i].timer:SetText(VGST_SecondsToTime(remaining))
-						if (remaining < 10) then VGST_TotemBars.totemFrames[i].timer:SetTextColor(1, 0, 0) end
+						-- Now we need to display the time left on the weapon after the last tick
+						local chantCode = getWeaponEnchantmentDuration(16)
+						if (chantCode ~= nil and chantCode >= 0) then
+							VGST_TotemBars.totemFrames[i].timer:SetText(VGST_SecondsToTime(chantCode))
+							if (chantCode < 5) then
+								VGST_TotemBars.totemFrames[i].timer:SetTextColor(1, 0, 0)
+							else
+								VGST_TotemBars.totemFrames[i].timer:SetTextColor(1, 1, 1)
+							end
+						end
 					end
 				end
 			elseif (VGST_ActiveTotems ~= nil and VGST_ActiveTotems[caster] ~= nil and VGST_ActiveTotems[caster][element] == nil) then
