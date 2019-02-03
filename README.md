@@ -7,6 +7,9 @@
 * `/vgst` - list of commands
 * `/vgst reset` - resets the position and scale of the bar
 * `/vgst move` - unlocks the bar so that it can be moved
+* `/vgst scale 1` - Changes the scale of the bar with totem icons - float between (0, 1]
+* `/vgst toggleWarning` - Toggles the BigWigs warning for destroyed totems in your party on or off
+
 
 ## Features
 * Tracks remaining duration of your totems
