@@ -1,4 +1,4 @@
-VGST_defaultConfig = {x = 0, y = 0, isUnlocked = true, scale = 1.0, defaultHeight = 50, defaultWidth = 50, defaultTextSize = 18, numTotems = 15}
+VGST_defaultConfig = {x = 0, y = 0, isUnlocked = true, scale = 1.0, defaultHeight = 50, defaultWidth = 50, defaultTextSize = 18, numTotems = 15, toggleWarning = true}
 VGST_TotemInfo = nil
 VGST_CharacterSubgroup = nil
 VGST_SubgroupCharacters = nil
@@ -426,6 +426,8 @@ function VGST_OnEvent()
 			VGSTConfig.defaultWidth = VGST_defaultConfig.defaultWidth
 			VGSTConfig.defaultTextSize = VGST_defaultConfig.defaultTextSize
 			VGSTConfig.numTotems = VGST_defaultConfig.numTotems
+		end
+		if (VGSTConfig.toggleWarning == nil) then
 			VGSTConfig.toggleWarning = true
 		end
 		VGST_LoadTotemInfo()
@@ -717,11 +719,12 @@ function VGST_SlashCommand(msg)
 			VGST_TotemBars.mainFrame:SetMovable(false)
 		end
 	elseif (msg == "toggleWarning") then
-		if (VGSTConfig.toggleWarning == true)
+		if (VGSTConfig.toggleWarning == true) then
 			VGSTConfig.toggleWarning = false
 		else
 			VGSTConfig.toggleWarning = true
-		DEFAULT_CHAT_FRAME:AddMessage( "Warning toggle set to "..(VGSTConfig.toggleWarning) )
+		end
+		DEFAULT_CHAT_FRAME:AddMessage( "Warning toggle set to "..tostring(VGSTConfig.toggleWarning))
 	elseif (string.find(msg, "scale ")) then
 		for scale in string.gfind( msg, "scale (.*)" ) do
 			VGSTConfig.scale = scale
