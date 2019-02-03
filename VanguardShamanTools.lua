@@ -168,7 +168,6 @@ end
 
 function VGST_totemFrameBar(flag)
 	if (flag == true) then
-		Print("locked")
 		for i = 1, 9 do
 			if (LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:UnregisterEvent("PARTY_MEMBERS_CHANGED")
@@ -176,7 +175,6 @@ function VGST_totemFrameBar(flag)
 			end
 		end
 	elseif (flag == false) then
-		Print("unlocked")
 		for i = 1, 9 do
 			if (LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:RegisterEvent("PARTY_MEMBERS_CHANGED")
