@@ -481,9 +481,9 @@ function VGST_OnEvent()
 							local zone = GetZoneText()
 							local channel = "RAID"
 							if (zone == "Warsong Gulch" or zone == "Arathi Basin" or zone == "Alterac Valley") then channel = "BATTLEGROUND" end
-							SendAddonMessage("VGST_TotemDamage", playerName.."!"..VGST_TotemInfo[totemName].element.."!"..(VGST_ActiveTotems[playerName][element].health - tonumber(damage)), channel)
+							SendAddonMessage("VGST_TotemDamage", playerName.."!"..VGST_TotemInfo[totemName].element.."!"..(tonumber(VGST_ActiveTotems[playerName][element].health) - tonumber(damage)), channel)
 						else
-							VGST_ReduceTotemHealth(playerName, VGST_TotemInfo[totemName].element, VGST_ActiveTotems[playerName][element].health - tonumber(damage))
+							VGST_ReduceTotemHealth(playerName, VGST_TotemInfo[totemName].element, tonumber(VGST_ActiveTotems[playerName][element].health) - tonumber(damage))
 						end
 						-- Print(VGST_ActiveTotems[playerName][element].health - tonumber(damage))
 					end
@@ -621,7 +621,7 @@ function VGST_OnUpdate()
 						if ((texturePath == "Interface\\Icons\\Spell_Nature_Windfury" or texturePath == "Interface\\Icons\\Spell_Nature_GuardianWard") and VGST_ActiveTotems[caster][16] == nil and chantCode ~= nil and chantCode >= 0) then
 							-- If it is a weapon totem, we need to make sure that we keep tracking it when we regain the weapon buff
 							local weaponTexture = GetInventoryItemTexture("player", 16)
-							VGST_ActiveTotems[caster][16] = {texturePath = weaponTexture, duration = VGST_ActiveTotems[caster][element].duration, tickInterval = 5, x = 0, y = 0, castAt = VGST_ActiveTotems[caster][element].castAt}
+							VGST_ActiveTotems[caster][16] = {texturePath = weaponTexture, duration = VGST_ActiveTotems[caster][element].duration, tickInterval = 5, x = 0, y = 0, castAt = VGST_ActiveTotems[caster][element].castAt, health = 1}
 							VGST_UpdateYourTotems()
 						end
 					else -- weapon totems enchantment
