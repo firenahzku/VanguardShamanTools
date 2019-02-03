@@ -339,7 +339,7 @@ function VGST_UpdateYourTotems()
 		for element, entry in pairs(val) do
 			if (tonumber(VGST_ActiveTotems[caster][element].health) <= 0) then
 				if (VGST_ShamansInGroup[caster] == true) then -- Shaman was in your group, and we want to be notified that his totem was destroyed
-					if (BigWigsWarningSign ~= nil and BigWigsMessages ~= nil) then
+					if (VGSTConfig.toggleWarning == true and BigWigsWarningSign ~= nil and BigWigsMessages ~= nil) then
 						BigWigsWarningSign:BigWigs_ShowWarningSign(VGST_ActiveTotems[caster][element].texturePath, 5, true)
 						BigWigsMessages:BigWigs_Message("Totem destroyed!", "Attention", true, "Long")
 					else
@@ -426,6 +426,7 @@ function VGST_OnEvent()
 			VGSTConfig.defaultWidth = VGST_defaultConfig.defaultWidth
 			VGSTConfig.defaultTextSize = VGST_defaultConfig.defaultTextSize
 			VGSTConfig.numTotems = VGST_defaultConfig.numTotems
+			VGSTConfig.toggleWarning = true
 		end
 		VGST_LoadTotemInfo()
 		VGST_LoadRosterInfo()
@@ -715,6 +716,12 @@ function VGST_SlashCommand(msg)
 			-- VGST_TotemBars.mainFrame:Hide()
 			VGST_TotemBars.mainFrame:SetMovable(false)
 		end
+	elseif (msg == "toggleWarning") then
+		if (VGSTConfig.toggleWarning == true)
+			VGSTConfig.toggleWarning = false
+		else
+			VGSTConfig.toggleWarning = true
+		DEFAULT_CHAT_FRAME:AddMessage( "Warning toggle set to "..(VGSTConfig.toggleWarning) )
 	elseif (string.find(msg, "scale ")) then
 		for scale in string.gfind( msg, "scale (.*)" ) do
 			VGSTConfig.scale = scale
@@ -725,6 +732,7 @@ function VGST_SlashCommand(msg)
 		DEFAULT_CHAT_FRAME:AddMessage( "/vgst reset" )
 		DEFAULT_CHAT_FRAME:AddMessage( "/vgst move" )
 		DEFAULT_CHAT_FRAME:AddMessage( "/vgst scale "..VGSTConfig.scale )
+		DEFAULT_CHAT_FRAME:AddMessage( "/vgst toggleWarning" )
 	end
 end
 
