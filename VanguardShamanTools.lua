@@ -169,14 +169,14 @@ end
 function VGST_totemFrameBar(flag)
 	if (flag == true) then
 		for i = 1, 9 do
-			if (LunaUF.Units.headerFrames["raid"..i]) then
+			if (LunaUF ~= nil LunaUF.Units ~= nil and LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:UnregisterEvent("PARTY_MEMBERS_CHANGED")
 				LunaUF.Units.headerFrames["raid"..i]:UnregisterEvent("RAID_ROSTER_UPDATE")
 			end
 		end
 	elseif (flag == false) then
 		for i = 1, 9 do
-			if (LunaUF.Units.headerFrames["raid"..i]) then
+			if (LunaUF ~= nil LunaUF.Units ~= nil and LunaUF.Units.headerFrames["raid"..i]) then
 				LunaUF.Units.headerFrames["raid"..i]:RegisterEvent("PARTY_MEMBERS_CHANGED")
 				LunaUF.Units.headerFrames["raid"..i]:RegisterEvent("RAID_ROSTER_UPDATE")
 				LunaUF.Units.headerFrames["raid"..i].Update(LunaUF.Units.headerFrames["raid"..i])
@@ -318,6 +318,7 @@ function VGST_ReduceTotemHealth(caster, element, newHealth)
 end
 
 function VGST_UpdateYourTotems()
+	VGST_LoadRosterInfo()
 	local playerName = UnitName("player")
 	local playerSubgroup = VGST_CharacterSubgroup[playerName]
 	local VGST_ShamansInGroup = {}
