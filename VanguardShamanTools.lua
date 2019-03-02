@@ -521,7 +521,7 @@ function VGST_OnEvent()
 			if (VGST_ActiveTotems ~= nil and VGST_ActiveTotems[playerName] ~= nil) then
 				for element, entry in pairs(VGST_ActiveTotems[playerName]) do
 					if (element ~= 16 and element ~= 17) then
-						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..entry.tickTimer.."!"..(GetTime() - entry.castAt).."!"..entry.totalDuration.."!"..entry.health, channel)
+						SendAddonMessage("VGST_NewTotem", playerName.."!"..entry.texturePath.."!"..entry.duration.."!"..element.."!"..entry.tickInterval.."!"..(GetTime() - entry.castAt).."!"..entry.health, channel)
 					end
 				end
 			end
